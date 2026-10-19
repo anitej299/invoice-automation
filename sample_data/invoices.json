@@ -1,0 +1,394 @@
+[
+  {
+    "scenario": "Valid invoice",
+    "filename": "demo-01.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-001",
+      "vendor_name": "Northstar Design",
+      "vendor_email": "accounts0@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-28",
+      "purchase_order_number": "PO-100",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Paid invoice",
+    "filename": "demo-02.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-002",
+      "vendor_name": "Orbit Cloud",
+      "vendor_email": "accounts1@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-28",
+      "purchase_order_number": "PO-101",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Overdue invoice",
+    "filename": "demo-03.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-003",
+      "vendor_name": "Papertrail Office",
+      "vendor_email": "accounts2@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-05",
+      "purchase_order_number": "PO-102",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Due-soon invoice",
+    "filename": "demo-04.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-004",
+      "vendor_name": "Atlas Logistics",
+      "vendor_email": "accounts3@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-18",
+      "purchase_order_number": "PO-103",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Duplicate invoice",
+    "filename": "demo-05.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-001",
+      "vendor_name": "Northstar Design",
+      "vendor_email": "accounts4@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-28",
+      "purchase_order_number": "PO-104",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Missing PO",
+    "filename": "demo-06.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-006",
+      "vendor_name": "Cedar Consulting",
+      "vendor_email": "accounts5@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-28",
+      "purchase_order_number": null,
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "High-value invoice",
+    "filename": "demo-07.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-007",
+      "vendor_name": "Meridian Systems",
+      "vendor_email": "accounts6@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-28",
+      "purchase_order_number": "PO-106",
+      "currency": "INR",
+      "subtotal": "600000.00",
+      "tax": "108000.00",
+      "discount": "0.00",
+      "total": "708000.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "600000.00",
+          "tax": "108000.00",
+          "amount": "708000.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Invalid total",
+    "filename": "demo-08.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-008",
+      "vendor_name": "Copper Studio",
+      "vendor_email": "accounts7@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-28",
+      "purchase_order_number": "PO-107",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "15000.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Invalid due date",
+    "filename": "demo-09.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-009",
+      "vendor_name": "Nimbus Hosting",
+      "vendor_email": "accounts8@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-09-04",
+      "purchase_order_number": "PO-108",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.98,
+        "vendor_name": 0.98,
+        "invoice_date": 0.98,
+        "due_date": 0.98,
+        "currency": 0.98,
+        "total": 0.98
+      },
+      "warnings": []
+    }
+  },
+  {
+    "scenario": "Low-confidence review",
+    "filename": "demo-10.pdf",
+    "extraction": {
+      "invoice_number": "DEMO-010",
+      "vendor_name": "Harbor Analytics",
+      "vendor_email": "accounts9@example.test",
+      "vendor_address": "12 Example Avenue, Bengaluru",
+      "customer_name": "Acme Finance",
+      "customer_address": "42 Sample Road, Bengaluru",
+      "invoice_date": "2026-09-14",
+      "due_date": "2026-10-28",
+      "purchase_order_number": "PO-109",
+      "currency": "INR",
+      "subtotal": "10000.00",
+      "tax": "1800.00",
+      "discount": "0.00",
+      "total": "11800.00",
+      "payment_terms": "Net 30",
+      "line_items": [
+        {
+          "description": "Professional services",
+          "quantity": "1",
+          "unit_price": "10000.00",
+          "tax": "1800.00",
+          "amount": "11800.0"
+        }
+      ],
+      "confidence": {
+        "invoice_number": 0.3,
+        "vendor_name": 0.3,
+        "invoice_date": 0.3,
+        "due_date": 0.3,
+        "currency": 0.3,
+        "total": 0.3
+      },
+      "warnings": [
+        "Blurred source document"
+      ]
+    }
+  }
+]

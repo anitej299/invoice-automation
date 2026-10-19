@@ -1,0 +1,94 @@
+{
+  "name": "Authenticated payment confirmation",
+  "nodes": [
+    {
+      "id": "webhook---confirmed-payment",
+      "name": "Webhook - Confirmed Payment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoice-payment-confirmed",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "validate-payment-event",
+      "name": "Validate Payment Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const b=$json.body; if(!b || !Number.isInteger(b.invoice_id) || b.invoice_id < 1 || typeof b.payment_reference !== 'string' || b.payment_reference.length < 3) throw new Error('invoice_id and payment_reference are required'); return {json:b};"
+      }
+    },
+    {
+      "id": "backend---mark-paid",
+      "name": "Backend - Mark Paid",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://backend:8000/api/invoices/{{ $json.invoice_id }}/pay",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 180000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {reason: 'Confirmed payment: ' + $json.payment_reference} }}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "Webhook - Confirmed Payment": {
+      "main": [
+        [
+          {
+            "node": "Validate Payment Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Payment Event": {
+      "main": [
+        [
+          {
+            "node": "Backend - Mark Paid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none"
+  },
+  "pinData": {},
+  "tags": []
+}

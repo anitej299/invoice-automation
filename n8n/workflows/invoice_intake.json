@@ -1,0 +1,299 @@
+{
+  "name": "Invoice intake - Gmail to Drive to validation",
+  "nodes": [
+    {
+      "id": "gmail---new-invoice",
+      "name": "Gmail - New Invoice",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": true,
+        "filters": {
+          "q": "has:attachment (subject:invoice OR filename:invoice) (filename:pdf OR filename:png OR filename:jpg OR filename:jpeg)",
+          "readStatus": "both"
+        }
+      }
+    },
+    {
+      "id": "gmail---download-attachments",
+      "name": "Gmail - Download Attachments",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "extract-attachments",
+      "name": "Extract Attachments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const out = []; for (const [index,item] of $input.all().entries()) { for (const [key,file] of Object.entries(item.binary || {})) { if (/\\.(pdf|png|jpe?g)$/i.test(file.fileName || '')) out.push({json:{gmail_message_id:item.json.id,attachment_id:key,source_email:item.json.from?.text || String(item.json.from || ''),source_filename:file.fileName},binary:{data:file},pairedItem:{item:index}}); } } return out;"
+      }
+    },
+    {
+      "id": "loop---each-attachment",
+      "name": "Loop - Each Attachment",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        750,
+        300
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "drive---upload-invoice",
+      "name": "Drive - Upload Invoice",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1000,
+        300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "inputDataFieldName": "data",
+        "name": "={{ $json.gmail_message_id + '_' + $json.attachment_id + '_' + $json.source_filename }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_INVOICE_FOLDER_ID"
+        },
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "restore-attachment-context",
+      "name": "Restore Attachment Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const source = $('Loop - Each Attachment').item; return {json:{...source.json,google_drive_url:'https://drive.google.com/file/d/' + $json.id + '/view'},binary:source.binary};"
+      }
+    },
+    {
+      "id": "backend---process-invoice",
+      "name": "Backend - Process Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1500,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/api/processing/invoice",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 180000
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "gmail_message_id",
+              "value": "={{ $json.gmail_message_id }}"
+            },
+            {
+              "name": "attachment_id",
+              "value": "={{ $json.attachment_id }}"
+            },
+            {
+              "name": "source_email",
+              "value": "={{ $json.source_email }}"
+            },
+            {
+              "name": "google_drive_url",
+              "value": "={{ $json.google_drive_url }}"
+            }
+          ]
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "log---integration-failure",
+      "name": "Log - Integration Failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1750,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "console.error('Invoice attachment integration failed; inspect execution and retry after reconciliation.'); return $input.item;"
+      }
+    }
+  ],
+  "connections": {
+    "Gmail - New Invoice": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Download Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Download Attachments": {
+      "main": [
+        [
+          {
+            "node": "Extract Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Attachments": {
+      "main": [
+        [
+          {
+            "node": "Loop - Each Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive - Upload Invoice": {
+      "main": [
+        [
+          {
+            "node": "Restore Attachment Context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log - Integration Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Attachment Context": {
+      "main": [
+        [
+          {
+            "node": "Backend - Process Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backend - Process Invoice": {
+      "main": [
+        [
+          {
+            "node": "Loop - Each Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log - Integration Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log - Integration Failure": {
+      "main": [
+        [
+          {
+            "node": "Loop - Each Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop - Each Attachment": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Drive - Upload Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none"
+  },
+  "pinData": {},
+  "tags": []
+}

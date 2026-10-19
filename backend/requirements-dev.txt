@@ -1,0 +1,3 @@
+-r requirements.txt
+reportlab>=4.3,<5
+ruff>=0.17,<1

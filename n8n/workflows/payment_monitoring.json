@@ -1,0 +1,242 @@
+{
+  "name": "Payment monitoring and reminders",
+  "nodes": [
+    {
+      "id": "schedule---payment-check",
+      "name": "Schedule - Payment Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "backend---refresh-payment-status",
+      "name": "Backend - Refresh Payment Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/api/automation/monitor",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 180000
+        }
+      }
+    },
+    {
+      "id": "backend---reserve-notifications",
+      "name": "Backend - Reserve Notifications",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/api/automation/notifications/claim?kind=payment",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 180000
+        }
+      }
+    },
+    {
+      "id": "loop---each-notification",
+      "name": "Loop - Each Notification",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        750,
+        300
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "gmail---send-reminder",
+      "name": "Gmail - Send Reminder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1000,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.recipient }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "backend---acknowledge-delivery",
+      "name": "Backend - Acknowledge Delivery",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1250,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://backend:8000/api/automation/notifications/{{ $('Loop - Each Notification').item.json.id }}/sent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 180000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {delivery_id: $json.id} }}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "log---delivery-uncertain",
+      "name": "Log - Delivery Uncertain",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "console.error('Delivery is unacknowledged. Check Gmail Sent and the reserved reminder before attempting a manual resend.'); return $input.item;"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule - Payment Check": {
+      "main": [
+        [
+          {
+            "node": "Backend - Refresh Payment Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backend - Refresh Payment Status": {
+      "main": [
+        [
+          {
+            "node": "Backend - Reserve Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backend - Reserve Notifications": {
+      "main": [
+        [
+          {
+            "node": "Loop - Each Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop - Each Notification": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Gmail - Send Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send Reminder": {
+      "main": [
+        [
+          {
+            "node": "Backend - Acknowledge Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log - Delivery Uncertain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backend - Acknowledge Delivery": {
+      "main": [
+        [
+          {
+            "node": "Loop - Each Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log - Delivery Uncertain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log - Delivery Uncertain": {
+      "main": [
+        [
+          {
+            "node": "Loop - Each Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none"
+  },
+  "pinData": {},
+  "tags": []
+}
